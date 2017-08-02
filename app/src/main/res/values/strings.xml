@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Museum Guide</string>
+    <string name="error_failure">Oops… Something went wrong</string>
+    <string name="error_location_not_found">Unable to find location</string>
+    <string name="error_no_museums_found">Sorry… No museums found in this area</string>
+    <string name="btn_search_this_area">Search this area</string>
+    <string name="text_rating">%1$s (based on %2$s reviews)</string>
+    <string name="title_photos">Photos (%1$s)</string>
+    <string name="text_posted_at">Posted at %1$s</string>
+    <string name="title_favourite_museums">Favourite Museums</string>
+</resources>
