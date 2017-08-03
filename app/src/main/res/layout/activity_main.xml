@@ -20,7 +20,7 @@
             android:layout_height="wrap_content"
             android:iconifiedByDefault="false"
             android:queryHint="Search"
-            android:layout_centerHorizontal="true" />
+            android:layout_gravity="right" />
 
     </android.support.v7.widget.Toolbar>
 
