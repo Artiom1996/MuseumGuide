@@ -4,8 +4,10 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
@@ -89,9 +91,10 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
 
 
         svFindMuseum.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @RequiresApi(api = Build.VERSION_CODES.GINGERBREAD)
             @Override
             public boolean onQueryTextSubmit(String query) {
-                
+
                 if (!svFindMuseum.getQuery().toString().isEmpty() && map != null) {
 
                     LatLng center = map.getCameraPosition().target;
@@ -99,8 +102,8 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
                     location.setLatitude(center.latitude);
                     location.setLongitude(center.longitude);
 
-                    String queue = svFindMuseum.getQuery().toString();
-                    getMuseumsByQueue(location, queue);
+                    String museumQuery = svFindMuseum.getQuery().toString();
+                    getMuseums(location, museumQuery, RADIUS);
 
                 }
 
@@ -124,14 +127,14 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
         Location location = new Location("");
         location.setLatitude(center.latitude);
         location.setLongitude(center.longitude);
-        getMuseums(location);
+        getMuseums(location, null, null);
     }
 
 
-    private void getMuseums(Location location) {
+    private void getMuseums(Location location, String query, String radius) {
         FoursquareApiService api = FoursquareServiceHelper.getApiService();
 
-        Call<MuseumListResponse> call = api.getMuseumList(FOURSQUARE_CLIENT_ID, FOURSQUARE_CLIENT_SECRET, FOURSQUARE_API_VERSION, location.getLatitude() + "," + location.getLongitude(), MUSEUM_CATEGORY_ID, null , null);
+        Call<MuseumListResponse> call = api.getMuseumList(FOURSQUARE_CLIENT_ID, FOURSQUARE_CLIENT_SECRET, FOURSQUARE_API_VERSION, location.getLatitude() + "," + location.getLongitude(), MUSEUM_CATEGORY_ID, query, radius);
         call.enqueue(new Callback<MuseumListResponse>() {
             @Override
             public void onResponse(Call<MuseumListResponse> call, Response<MuseumListResponse> response) {
@@ -217,7 +220,7 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
         CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude()));
         map.animateCamera(cameraUpdate);
 
-        getMuseums(location);
+        getMuseums(location, null, null);
 
         map.setMyLocationEnabled(true);
     }
@@ -264,33 +267,6 @@ public class MainActivity extends BaseActivity implements OnMapReadyCallback {
     public void showFavouriteMuseums() {
         Intent intent = new Intent(this, FavouriteMuseumsActivity.class);
         startActivity(intent);
-    }
-
-    public void getMuseumsByQueue(Location location, String queue) {
-        FoursquareApiService api = FoursquareServiceHelper.getApiService();
-
-        Call<MuseumListResponse> call = api.getMuseumList(FOURSQUARE_CLIENT_ID, FOURSQUARE_CLIENT_SECRET, FOURSQUARE_API_VERSION, location.getLatitude() + "," + location.getLongitude(), MUSEUM_CATEGORY_ID, queue, RADIUS);
-        call.enqueue(new Callback<MuseumListResponse>() {
-            @Override
-            public void onResponse(Call<MuseumListResponse> call, Response<MuseumListResponse> response) {
-                if (response.isSuccessful()) {
-                    map.clear();
-                    ArrayList<Museum> museums = response.body().getResponse().getMuseums();
-                    if (museums.isEmpty()) {
-                        showError(R.string.error_no_museums_found, root);
-                        return;
-                    }
-                    showMuseumsOnMap(museums);
-                } else {
-                    showDefaultError(root);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<MuseumListResponse> call, Throwable t) {
-                showDefaultError(root);
-            }
-        });
     }
 
 
